@@ -17,6 +17,28 @@ var DefaultTabBar = require('./DefaultTabBar');
 var deviceWidth = Dimensions.get('window').width;
 var deviceHeight = Dimensions.get('window').height;
 
+class PatchedScrollView extends ScrollView {
+  _scrollResponderHandleScrollShouldSetResponder() {
+    let scrollEnabled = typeof this.props.scrollEnabled  === 'undefined' ? true : this.props.scrollEnabled;
+    return this.state.isTouching && scrollEnabled;
+  }
+
+  _scrollResponderHandleTerminationRequest() {
+    let scrollEnabled = typeof this.props.scrollEnabled  === 'undefined' ? true : this.props.scrollEnabled;
+    return !this.state.observedScrollSinceBecomingResponder || !scrollEnabled;
+  }
+
+  render(){
+    let oldScroll = super.render();
+    let newScroll = React.cloneElement(oldScroll, {
+      onScrollShouldSetResponder: this._scrollResponderHandleScrollShouldSetResponder.bind(this),
+      onResponderTerminationRequest: this._scrollResponderHandleTerminationRequest.bind(this)
+    });
+
+    return newScroll;
+  }
+}
+
 var ScrollableTabView = React.createClass({
   statics: {
     DefaultTabBar,
@@ -85,7 +107,7 @@ var ScrollableTabView = React.createClass({
   renderScrollableContent() {
     if (Platform.OS === 'ios') {
       return (
-        <ScrollView
+        <PatchedScrollView
           horizontal
           pagingEnabled
           style={styles.scrollableContentIOS}
@@ -116,7 +138,7 @@ var ScrollableTabView = React.createClass({
               {child}
             </View>
             })}
-        </ScrollView>
+        </PatchedScrollView>
       );
     } else {
       return (
