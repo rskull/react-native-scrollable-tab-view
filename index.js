@@ -43,13 +43,14 @@ const ScrollableTabView = React.createClass({
   },
 
   propTypes: {
-    tabBarPosition: PropTypes.oneOf(['top', 'bottom', ]),
+    tabBarPosition: PropTypes.oneOf(['top', 'bottom', 'overlayTop', 'overlayBottom', ]),
     initialPage: PropTypes.number,
     page: PropTypes.number,
     onChangeTab: PropTypes.func,
     onScroll: PropTypes.func,
     renderTabBar: PropTypes.any,
     style: View.propTypes.style,
+    contentProps: PropTypes.object
   },
 
   getDefaultProps() {
@@ -59,6 +60,7 @@ const ScrollableTabView = React.createClass({
       page: -1,
       onChangeTab: () => {},
       onScroll: () => {},
+      contentProps: {}
     };
   },
 
@@ -105,6 +107,7 @@ const ScrollableTabView = React.createClass({
         <PatchedScrollView
           horizontal
           pagingEnabled
+          automaticallyAdjustContentInsets={false}
           style={styles.scrollableContentIOS}
           contentContainerStyle={styles.scrollableContentContainerIOS}
           contentOffset={{ x: this.props.initialPage * this.state.containerWidth, }}
@@ -125,7 +128,9 @@ const ScrollableTabView = React.createClass({
           showsHorizontalScrollIndicator={false}
           scrollEnabled={!this.props.locked}
           directionalLockEnabled
-          alwaysBounceVertical={false}>
+          alwaysBounceVertical={false}
+          keyboardDismissMode="on-drag"
+          {...this.props.contentProps}>
           {this._children().map((child, idx) => {
             return <View
               key={child.props.tabLabel + '_' + idx}
@@ -141,11 +146,13 @@ const ScrollableTabView = React.createClass({
          style={styles.scrollableContentAndroid}
          initialPage={this.props.initialPage}
          onPageSelected={this._updateSelectedPage}
+         keyboardDismissMode="on-drag"
          onPageScroll={(e) => {
            const { offset, position, } = e.nativeEvent;
            this._updateScrollValue(position + offset);
          }}
-         ref={(scrollView) => { this.scrollView = scrollView; }}>
+         ref={(scrollView) => { this.scrollView = scrollView; }}
+         {...this.props.contentProps}>
          {this._children().map((child, idx) => {
            return <View
              key={child.props.tabLabel + '_' + idx}
@@ -184,16 +191,12 @@ const ScrollableTabView = React.createClass({
     }
   },
 
-  // The following implementation allows for compatibility with version
-  // of React Native that depend on React.Children prior to
-  // facebook/react#6013105a9cf625cac18851683adbf2fd19b6833c
   _children() {
-    let result = [];
-    React.Children.forEach(this.props.children, (child) => result.push(child));
-    return result;
+    return React.Children.map(this.props.children, (child) => child);
   },
 
   render() {
+    let overlayTabs = (this.props.tabBarPosition === 'overlayTop' || this.props.tabBarPosition === 'overlayBottom');
     let tabBarProps = {
       goToPage: this.goToPage,
       tabs: this._children().map((child) => child.props.tabLabel),
@@ -214,12 +217,20 @@ const ScrollableTabView = React.createClass({
     if (this.props.tabBarInactiveTextColor) {
       tabBarProps.inactiveTextColor = this.props.tabBarInactiveTextColor;
     }
+    if (overlayTabs) {
+      tabBarProps.style = {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        [this.props.tabBarPosition === 'overlayTop' ? 'top' : 'bottom']: 0
+      };
+    }
 
     return (
       <View style={[styles.container, this.props.style, ]} onLayout={this._handleLayout}>
-        {this.props.tabBarPosition === 'top' ? this.renderTabBar(tabBarProps) : null}
+        {this.props.tabBarPosition === 'top' && this.renderTabBar(tabBarProps)}
         {this.renderScrollableContent()}
-        {this.props.tabBarPosition === 'bottom' ? this.renderTabBar(tabBarProps) : null}
+        {(this.props.tabBarPosition === 'bottom' || overlayTabs) && this.renderTabBar(tabBarProps)}
       </View>
     );
   },
