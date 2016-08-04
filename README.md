@@ -1,5 +1,6 @@
 
 ## react-native-scrollable-tab-view
+[![npm version](https://badge.fury.io/js/react-native-scrollable-tab-view.svg)](https://badge.fury.io/js/react-native-scrollable-tab-view)
 
 This is probably my favorite navigation pattern on Android, I wish it
 were more common on iOS! This is a very simple JavaScript-only
@@ -71,10 +72,10 @@ var App = React.createClass({
 
 ## Props
 
-- **`renderTabBar`** _(Function:ReactComponent)_ - should return a component to use as
+- **`renderTabBar`** _(Function:ReactComponent)_ - accept 1 argument `props` and should return a component to use as
   the tab bar. The component has `goToPage`, `tabs`, `activeTab` and
   `ref` added to the props, and should implement `setAnimationValue` to
-  be able to animate itself along with the tab content.
+  be able to animate itself along with the tab content. You can manually pass the `props` to the TabBar component.
 - **`tabBarPosition`** _(String)_ Defaults to `"top"`.
   - `"bottom"` to position the tab bar below content.
   - `"overlayTop"` or `"overlayBottom"` for a semitransparent tab bar that overlays content. Custom tab bars must consume a style prop on their outer element to support this feature: `style={this.props.style}`.
@@ -92,11 +93,18 @@ var App = React.createClass({
 - **`style`** _([View.propTypes.style](https://facebook.github.io/react-native/docs/view.html#style))_
 - **`contentProps`** _(Object)_ - props that are applied to root `ScrollView`/`ViewPagerAndroid`. Note that overriding defaults set by the library may break functionality; see the source for details.
 - **`scrollWithoutAnimation`** _(Bool)_ - on tab press change tab without animation.
+- **`prerenderingSiblingsNumber`** _(Integer)_ - pre-render nearby # sibling, `Infinity` === render all the siblings, default to 0 === render current page.
 
 ## Contribution
 **Issues** are welcome. Please add a screenshot of bug and code snippet. Quickest way to solve issue is to reproduce it on one of the examples.
 
 **Pull requests** are welcome. If you want to change API or making something big better to create issue and discuss it first. Before submiting PR please run ```eslint .``` Also all eslint fixes are welcome.
+
+Please attach video or gif to PR's and issues it is super helpful.
+
+<a href="http://www.abeautifulsite.net/recording-a-screencast-with-quicktime/" target="_blank">How to make video</a>
+
+<a href="https://github.com/jclem/gifify" target="_blank">How to make gif from video</a>
 
 ---
 

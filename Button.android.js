@@ -7,7 +7,8 @@ const {
 
 const Button = (props) => {
   return <TouchableNativeFeedback
-    background={TouchableNativeFeedback.SelectableBackground()}
+    delayPressIn={0}
+    background={TouchableNativeFeedback.SelectableBackgroundBorderless()} // eslint-disable-line new-cap
     {...props}
   >
     {props.children}
